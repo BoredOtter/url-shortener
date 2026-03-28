@@ -9,7 +9,7 @@ on:
 permissions:
   contents: read
   packages: write
-  id-token: write
+  id-token: write # Required for keyless OIDC signing
 
 jobs:
   build-image:
@@ -74,11 +74,7 @@ jobs:
       - name: Sign the images with GitHub OIDC Token
         env:
           DIGEST: ${{ steps.build-and-push.outputs.digest }}
-          TAGS: ${{ steps.docker_meta.outputs.tags }}
+          IMAGE: ghcr.io/${{ steps.image_namespace.outputs.owner }}/url-shortener-${{ matrix.name }}
         run: |
-          images=""
-          for tag in ${TAGS}; do
-            echo "Signing image: ${tag}@${DIGEST}"
-            images+="${tag}@${DIGEST} "
-          done
-          cosign sign --yes ${images}
+          echo "Signing image: ${IMAGE}@${DIGEST}"
+          cosign sign --yes "${IMAGE}@${DIGEST}"
