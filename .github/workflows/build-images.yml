@@ -74,10 +74,6 @@ jobs:
       - name: Sign image with GitHub OIDC token
         env:
           DIGEST: ${{ steps.build-and-push.outputs.digest }}
-          TAGS: ${{ steps.docker_meta.outputs.tags }}
+          IMAGE: ghcr.io/${{ steps.image_namespace.outputs.owner }}/url-shortener-${{ matrix.name }}
         run: |
-          images=""
-          for tag in ${TAGS}; do
-            images+="${tag}@${DIGEST} "
-          done
-          cosign sign --yes ${images}
+          cosign sign --yes "${IMAGE}@${DIGEST}"
