@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { createShortUrl } from "@/lib/api"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 
@@ -59,10 +59,11 @@ function App() {
               <Label htmlFor="url-input">Long URL</Label>
               <Input
                 id="url-input"
-                type="url"
+                type="text"
+                inputMode="url"
                 value={url}
                 onChange={(event) => setUrl(event.target.value)}
-                placeholder="https://example.com/very/long/link"
+                placeholder="example.com/very/long/link"
                 required
               />
             </div>

@@ -1,6 +1,8 @@
 import { z } from "zod"
 
-const API_BASE_PATH = "/api"
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") ??
+  (import.meta.env.DEV ? "http://localhost:8000/api" : "/api")
 
 const shortenRequestSchema = z.object({
   url: z.string().url("Enter a valid URL")
@@ -30,7 +32,7 @@ function normalizeUrlInput(value: string): string {
 export async function createShortUrl(longUrl: string): Promise<ShortenResponse> {
   const payload = shortenRequestSchema.parse({ url: normalizeUrlInput(longUrl) })
 
-  const response = await fetch(`${API_BASE_PATH}/shorten`, {
+  const response = await fetch(`${API_BASE_URL}/shorten`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"

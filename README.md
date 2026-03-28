@@ -60,12 +60,54 @@ docker compose --profile prod up --build client-prod
   - body JSON: `{"url":"https://example.com"}`
   - response JSON: `{"short_url":"...","long_url":"..."}`
 - `GET /{short_id}` — redirect do oryginalnego URL
+- `GET /healthz` lub `GET /livez` — liveness (lekki check procesu)
+- `GET /readyz` — readiness (sprawdza Redis)
+- `GET /startupz` — startup (czy aplikacja zakończyła inicjalizację)
+
+### Kubernetes probes (recommended)
+
+Przykład dla kontenera API na porcie `8000`:
+
+```yaml
+startupProbe:
+  httpGet:
+    path: /startupz
+    port: 8000
+  failureThreshold: 30
+  periodSeconds: 2
+  timeoutSeconds: 1
+
+livenessProbe:
+  httpGet:
+    path: /livez
+    port: 8000
+  periodSeconds: 10
+  timeoutSeconds: 1
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /readyz
+    port: 8000
+  periodSeconds: 5
+  timeoutSeconds: 1
+  failureThreshold: 3
+  successThreshold: 1
+```
+
+Uwagi:
+
+- `liveness` nie sprawdza zależności zewnętrznych (żeby unikać niepotrzebnych restartów).
+- `readiness` weryfikuje Redis i odcina ruch do poda, gdy Redis jest niedostępny.
+- Redis health check ma krótki timeout przez `REDIS_CONNECT_TIMEOUT` i `REDIS_SOCKET_TIMEOUT` (domyślnie `1s`).
 
 ## Local dev behavior
 
 - `api` startuje z `uv sync --frozen --no-dev` i `uvicorn --reload`.
 - `client` używa własnego obrazu developerskiego (`client/Dockerfile.dev`) i startuje z `yarn install --immutable` + `yarn dev`.
-- Frontend wysyła żądania na same-origin `/api` (Vite dev serwuje proxy do `api:8000`).
+- Frontend wysyła żądania bezpośrednio do API (`http://localhost:8000/api` domyślnie), bez proxy Vite.
+- URL API można zmienić przez `VITE_API_BASE_URL` (np. `http://localhost:8000/api`).
+- W buildzie produkcyjnym domyślny URL API to same-origin `/api` (np. `https://domain.com/api`).
 
 ## shadcn/ui
 

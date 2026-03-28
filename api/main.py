@@ -1,5 +1,6 @@
 import os
 import hashlib
+from urllib.parse import urlparse
 import redis
 from pydantic import BaseModel
 from fastapi import FastAPI, HTTPException, Request
@@ -9,9 +10,10 @@ from fastapi.responses import RedirectResponse
 app = FastAPI(
     title="K8s-Shortener",
     docs_url="/docs",
-    redoc_url="/redoc",
     openapi_url="/openapi.json",
 )
+
+app_started = False
 
 
 def _parse_cors_origins(value: str | None) -> list[str]:
@@ -37,47 +39,84 @@ if cors_origins:
 class ShortenRequest(BaseModel):
     url: str
 
+
+def _normalize_user_url(value: str) -> str:
+    candidate = value.strip()
+    if not candidate:
+        raise HTTPException(status_code=422, detail="URL is required")
+
+    if "://" not in candidate:
+        candidate = f"https://{candidate}"
+
+    parsed = urlparse(candidate)
+    if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+        raise HTTPException(status_code=422, detail="Enter a valid http(s) URL")
+
+    return candidate
+
 redis_client = redis.Redis(
     host=os.getenv("REDIS_HOST", "localhost"),
     port=int(os.getenv("REDIS_PORT", 6379)),
     password=os.getenv("REDIS_PASSWORD", None),
+    socket_connect_timeout=float(os.getenv("REDIS_CONNECT_TIMEOUT", "1")),
+    socket_timeout=float(os.getenv("REDIS_SOCKET_TIMEOUT", "1")),
+    retry_on_timeout=True,
     decode_responses=True,
 )
 
 
-def _is_redis_ready() -> bool:
+def _redis_health() -> tuple[bool, str | None]:
     try:
-        return bool(redis_client.ping())
-    except redis.RedisError:
-        return False
+        redis_client.ping()
+        return True, None
+    except redis.RedisError as err:
+        return False, str(err)
 
 
-@app.get("/")
-def read_root():
-    return {"service": "k8s-shortener-api", "status": "ok"}
-
+@app.on_event("startup")
+def mark_app_started():
+    global app_started
+    app_started = True
 
 @app.get("/healthz")
 def healthz():
-    return {"status": "ok"}
+    return {"status": "live"}
+
+
+@app.get("/livez")
+def livez():
+    return {"status": "live"}
+
+
+@app.get("/startupz")
+def startupz():
+    if not app_started:
+        raise HTTPException(status_code=503, detail="Application startup in progress")
+
+    return {"status": "started"}
 
 
 @app.get("/readyz")
 def readyz():
-    if not _is_redis_ready():
-        raise HTTPException(status_code=503, detail="Redis is not ready")
+    redis_ready, redis_error = _redis_health()
+    if not redis_ready:
+        raise HTTPException(
+            status_code=503,
+            detail={"status": "not-ready", "dependency": "redis", "error": redis_error},
+        )
 
-    return {"status": "ready"}
+    return {"status": "ready", "dependencies": {"redis": "ok"}}
 
 
 @app.post("/api/shorten")
 def shorten_url_api(request: Request, payload: ShortenRequest):
-    short_id = hashlib.md5(payload.url.encode()).hexdigest()[:6]
+    normalized_url = _normalize_user_url(payload.url)
+    short_id = hashlib.md5(normalized_url.encode()).hexdigest()[:6]
 
-    redis_client.setex(short_id, 86400, payload.url)
+    redis_client.setex(short_id, 86400, normalized_url)
 
     short_url = str(request.url_for("redirect_to_url", short_id=short_id))
-    return {"short_url": short_url, "long_url": payload.url}
+    return {"short_url": short_url, "long_url": normalized_url}
 
 
 @app.get("/{short_id}")
@@ -86,4 +125,4 @@ def redirect_to_url(short_id: str):
     if long_url:
         return RedirectResponse(url=long_url)
 
-    raise HTTPException(status_code=404, detail="Błąd 404: Nie znaleziono takiego linku!")
+    raise HTTPException(status_code=404, detail="ShortURL not found")
