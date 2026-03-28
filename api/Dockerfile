@@ -14,6 +14,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 	uv sync --frozen --no-dev --no-install-project --no-editable
 
 COPY main.py ./
+COPY app ./app
 RUN --mount=type=cache,target=/root/.cache/uv \
 	uv sync --frozen --no-dev --no-editable
 
@@ -29,6 +30,7 @@ RUN addgroup -S -g 10001 appgroup \
 
 COPY --from=builder /app/.venv /app/.venv
 COPY --chown=10001:10001 main.py ./main.py
+COPY --chown=10001:10001 app ./app
 
 USER 10001:10001
 
