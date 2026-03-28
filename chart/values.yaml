@@ -1,0 +1,82 @@
+namespace:
+  create: true
+
+api:
+  replicas: 1
+  image:
+    repository: url-shortener-api-dev
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    port: 8000
+    targetPort: http
+  env:
+    REDIS_HOST: redis
+    REDIS_PORT: "6379"
+    REDIS_CONNECT_TIMEOUT: "1"
+    REDIS_SOCKET_TIMEOUT: "1"
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  probes:
+    startup:
+      path: /startupz
+      failureThreshold: 30
+      periodSeconds: 2
+      timeoutSeconds: 1
+    liveness:
+      path: /livez
+      failureThreshold: 3
+      periodSeconds: 10
+      timeoutSeconds: 1
+    readiness:
+      path: /readyz
+      failureThreshold: 3
+      periodSeconds: 5
+      timeoutSeconds: 1
+
+client:
+  replicas: 1
+  image:
+    repository: url-shortener-client-dev
+    tag: latest
+    pullPolicy: IfNotPresent
+  containerPort: 8080
+  service:
+    port: 8080
+    targetPort: http
+  env:
+    VITE_API_BASE_URL: /api
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+redis:
+  replicas: 1
+  image:
+    repository: redis
+    tag: 7-alpine
+    pullPolicy: IfNotPresent
+  service:
+    port: 6379
+    targetPort: redis
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+
+ingress:
+  enabled: true
+  className: nginx
+  host: url-shortener.test

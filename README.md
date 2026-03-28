@@ -27,6 +27,54 @@ Adresy:
 - Frontend: `http://localhost:5173`
 - Backend API: `http://localhost:8000`
 
+## Local Kubernetes (Minikube + Tilt)
+
+W repo jest gotowy setup pod `minikube` + `tilt`:
+
+- `charts/url-shortener/` — chart Helm (`api`, `client`, `redis`, `ingress`)
+- `Tiltfile` — build obrazów i deploy do klastra przez `helm template`
+
+### 1) Start Minikube i Ingress
+
+```bash
+minikube start
+minikube addons enable ingress
+```
+
+### 2) Dodaj host lokalny
+
+Pobierz IP klastra:
+
+```bash
+minikube ip
+```
+
+Dodaj wpis do `/etc/hosts`:
+
+```text
+<MINIKUBE_IP> url-shortener.local
+```
+
+### 3) Uruchom Tilt
+
+```bash
+tilt up
+```
+
+Lub ręcznie przez Helm:
+
+```bash
+helm upgrade --install url-shortener ./charts/url-shortener --namespace url-shortener --create-namespace
+```
+
+Adresy:
+
+- App przez Ingress: `http://url-shortener.local`
+- API przez Ingress: `http://url-shortener.local/api`
+- Dodatkowo (Tilt port-forward):
+  - API: `http://localhost:8000`
+  - Client: `http://localhost:5173`
+
 Frontend używa Yarn Berry (`packageManager: yarn@4.x`).
 
 ## Produkcyjny frontend (baked static app)
