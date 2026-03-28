@@ -6,7 +6,12 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 
-app = FastAPI(title="K8s-Shortener")
+app = FastAPI(
+    title="K8s-Shortener",
+    docs_url="/docs",
+    redoc_url="/redoc",
+    openapi_url="/openapi.json",
+)
 
 
 def _parse_cors_origins(value: str | None) -> list[str]:
@@ -40,9 +45,29 @@ redis_client = redis.Redis(
 )
 
 
+def _is_redis_ready() -> bool:
+    try:
+        return bool(redis_client.ping())
+    except redis.RedisError:
+        return False
+
+
 @app.get("/")
 def read_root():
     return {"service": "k8s-shortener-api", "status": "ok"}
+
+
+@app.get("/healthz")
+def healthz():
+    return {"status": "ok"}
+
+
+@app.get("/readyz")
+def readyz():
+    if not _is_redis_ready():
+        raise HTTPException(status_code=503, detail="Redis is not ready")
+
+    return {"status": "ready"}
 
 
 @app.post("/api/shorten")

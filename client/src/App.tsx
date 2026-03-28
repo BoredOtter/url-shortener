@@ -45,15 +45,13 @@ function App() {
   return (
     <main className="mx-auto flex min-h-svh w-full max-w-3xl flex-col justify-center gap-6 px-4 py-10">
       <header className="space-y-2">
-        <p className="text-sm text-muted-foreground">Trusted URL shortener</p>
-        <h1 className="text-3xl font-semibold tracking-tight">K8s-Shortener</h1>
+        <p className="text-sm text-muted-foreground">Simple URL shortener</p>
         <p className="text-muted-foreground">Paste a long URL and get a short, shareable link.</p>
       </header>
 
       <Card>
         <CardHeader>
           <CardTitle>Create short URL</CardTitle>
-          <CardDescription>Backend API: {import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={onSubmit} className="space-y-4">

@@ -65,7 +65,7 @@ docker compose --profile prod up --build client-prod
 
 - `api` startuje z `uv sync --frozen --no-dev` i `uvicorn --reload`.
 - `client` używa własnego obrazu developerskiego (`client/Dockerfile.dev`) i startuje z `yarn install --immutable` + `yarn dev`.
-- Frontend używa `VITE_API_BASE_URL=http://localhost:8000` (ustawione w Compose).
+- Frontend wysyła żądania na same-origin `/api` (Vite dev serwuje proxy do `api:8000`).
 
 ## shadcn/ui
 
