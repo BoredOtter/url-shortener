@@ -57,7 +57,7 @@ jobs:
         with:
           images: ghcr.io/${{ steps.image_namespace.outputs.owner }}/url-shortener-${{ matrix.name }}
           tags: |
-            type=sha,format=long
+            type=sha,format=long,prefix=
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push ${{ matrix.name }} image
