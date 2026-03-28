@@ -16,9 +16,18 @@ spec:
       labels:
         app: client
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       containers:
         - name: client
           image: "{{ .Values.client.image.repository }}:{{ .Values.client.image.tag }}"
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
           imagePullPolicy: {{ .Values.client.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.client.containerPort }}
