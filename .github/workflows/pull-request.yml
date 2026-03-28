@@ -1,0 +1,66 @@
+name: Pull Request
+
+on:
+  pull_request:
+    branches:
+      - master
+
+permissions:
+  contents: read
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      api_changed: ${{ steps.paths.outputs.api }}
+      client_changed: ${{ steps.paths.outputs.client }}
+      has_changes: ${{ steps.paths.outputs.api == 'true' || steps.paths.outputs.client == 'true' }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Detect changed paths
+        id: paths
+        uses: dorny/paths-filter@v4
+        with:
+          filters: |
+            api:
+              - 'api/**'
+            client:
+              - 'client/**'
+
+  build-changed-on-pr:
+    if: github.event_name == 'pull_request' && needs.detect-changes.outputs.has_changes == 'true'
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: api
+            context: ./api
+            dockerfile: ./api/Dockerfile
+            image: url-shortener-api
+            has_changes: ${{ needs.detect-changes.outputs.api_changed == 'true' }}
+          - name: client
+            context: ./client
+            dockerfile: ./client/Dockerfile
+            image: url-shortener-client
+            has_changes: ${{ needs.detect-changes.outputs.client_changed == 'true' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build changed ${{ matrix.name }} image
+        if: ${{ matrix.has_changes }}
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          push: false
+          no-cache: true
+          tags: ${{ matrix.image }}:pr-${{ github.event.pull_request.number }}-${{ github.sha }}
