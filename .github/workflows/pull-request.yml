@@ -43,12 +43,12 @@ jobs:
             context: ./api
             dockerfile: ./api/Dockerfile
             image: url-shortener-api
-            has_changes: true #${{ needs.detect-changes.outputs.api_changed == 'true' }}
+            has_changes: ${{ needs.detect-changes.outputs.api_changed == 'true' }}
           - name: client
             context: ./client
             dockerfile: ./client/Dockerfile
             image: url-shortener-client
-            has_changes: true #${{ needs.detect-changes.outputs.client_changed == 'true' }}
+            has_changes: ${{ needs.detect-changes.outputs.client_changed == 'true' }}
 
     steps:
       - name: Checkout repository
