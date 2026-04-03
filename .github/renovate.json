@@ -3,7 +3,7 @@
     "dependencyDashboard": true,
     "platform": "github",
     "repositories": [
-        "BoredOtter/meme-giver"
+        "BoredOtter/url-shortener"
     ],
     "extends": ["config:best-practices"]
 }
