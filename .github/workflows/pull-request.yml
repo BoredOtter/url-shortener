@@ -19,11 +19,11 @@ jobs:
       has_changes: ${{ steps.paths.outputs.api == 'true' || steps.paths.outputs.client == 'true' }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Detect changed paths
         id: paths
-        uses: dorny/paths-filter@v4
+        uses: dorny/paths-filter@fbd0ab8f3e69293af611ebaee6363fc25e6d187d # v4
         with:
           filters: |
             api:
@@ -52,14 +52,14 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
 
       - name: Build API test target
         if: ${{ matrix.has_changes && matrix.name == 'api' }}
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
         with:
           context: ${{ matrix.context }}
           file: ${{ matrix.dockerfile }}
@@ -71,7 +71,7 @@ jobs:
 
       - name: Build changed ${{ matrix.name }} image
         if: ${{ matrix.has_changes }}
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
         with:
           context: ${{ matrix.context }}
           file: ${{ matrix.dockerfile }}
@@ -84,7 +84,7 @@ jobs:
 
       - name: Trivy scan changed ${{ matrix.name }} image for vulnerabilities and secrets
         if: ${{ matrix.has_changes }}
-        uses: aquasecurity/trivy-action@0.35.0
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # 0.35.0
         with:
           scan-type: image
           image-ref: ${{ matrix.image }}:pr-${{ github.event.pull_request.number }}-${{ github.sha }}
@@ -96,6 +96,6 @@ jobs:
           output: trivy-report-${{ matrix.name }}.json
 
       - name: Upload SARIF to GitHub Code Scanning
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@5c8a8a642e79153f5d047b10ec1cba1d1cc65699 # v3
         with:
           sarif_file: trivy-report-${{ matrix.name }}.json
