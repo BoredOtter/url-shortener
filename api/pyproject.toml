@@ -6,7 +6,6 @@ readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "fastapi==0.110.0",
-    "python-multipart==0.0.22",
     "redis==5.0.3",
     "uvicorn==0.27.1",
 ]
@@ -22,4 +21,4 @@ pythonpath = ["."]
 testpaths = ["tests"]
 
 [tool.uv]
-exclude-newer = "3 days"
+exclude-newer = "2 days"
