@@ -93,8 +93,9 @@ jobs:
           ignore-unfixed: false
           format: sarif
           exit-code: '0'
+          output: trivy-report-${{ matrix.name }}.json
 
       - name: Upload SARIF to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: trivy.sarif
+          sarif_file: trivy-report-${{ matrix.name }}.json
