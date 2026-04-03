@@ -82,40 +82,31 @@ jobs:
           cache-to: type=gha,mode=max,scope=${{ matrix.name }}-pr
           tags: ${{ matrix.image }}:pr-${{ github.event.pull_request.number }}-${{ github.sha }}
 
-  trivy-fs-scan:
-    if: needs.detect-changes.outputs.has_changes == 'true'
-    needs: detect-changes
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - name: api
-            path: ./api
-            changed_output: api_changed
-          - name: client
-            path: ./client
-            changed_output: client_changed
+  # trivy-fs-scan:
+  #   if: needs.detect-changes.outputs.has_changes == 'true'
+  #   needs: detect-changes
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       include:
+  #         - name: api
+  #           path: ./api
+  #           changed_output: api_changed
+  #         - name: client
+  #           path: ./client
+  #           changed_output: client_changed
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
 
-      - name: Trivy FS scan ${{ matrix.name }} (dependency vulns)
-        if: needs.detect-changes.outputs[matrix.changed_output] == 'true'
-        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # 0.35.0
-        with:
-          scan-type: fs
-          scan-ref: ${{ matrix.path }}
-          scanners: vuln
-          ignore-unfixed: false
-          format: sarif
-          exit-code: '0'
-          output: trivy-fs-${{ matrix.name }}.sarif
-
-      - name: Upload Trivy SARIF (${{ matrix.name }})
-        if: needs.detect-changes.outputs[matrix.changed_output] == 'true'
-        uses: github/codeql-action/upload-sarif@5c8a8a642e79153f5d047b10ec1cba1d1cc65699 # v3
-        with:
-          sarif_file: trivy-fs-${{ matrix.name }}.sarif
-          category: trivy-fs-${{ matrix.name }}
+  #     - name: Trivy FS scan ${{ matrix.name }} (dependency vulns)
+  #       if: needs.detect-changes.outputs[matrix.changed_output] == 'true'
+  #       uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # 0.35.0
+  #       with:
+  #         scan-type: fs
+  #         scan-ref: ${{ matrix.path }}
+  #         ignore-unfixed: false
+  #         format: sarif
+  #         exit-code: '0'

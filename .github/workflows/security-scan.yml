@@ -60,19 +60,38 @@ jobs:
             --certificate-oidc-issuer "${CERT_ISSUER}" \
             "${IMAGE_REF}"
 
-      - name: Trivy scan ${{ matrix.name }} HEAD image for vulnerabilities
+      - name: Trivy scan ${{ matrix.name }} HEAD image for OS vulnerabilities
         uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # 0.35.0
         with:
           scan-type: image
           image-ref: ghcr.io/${{ steps.image_meta.outputs.owner }}/${{ matrix.image }}:${{ steps.image_meta.outputs.head_sha }}
           scanners: vuln
+          vuln-type: os
           ignore-unfixed: false
           format: sarif
-          output: trivy-${{ matrix.name }}.sarif
+          output: trivy-${{ matrix.name }}-os.sarif
           exit-code: '0'
 
-      - name: Upload SARIF to GitHub Code Scanning
+      - name: Upload OS SARIF to GitHub Code Scanning
         uses: github/codeql-action/upload-sarif@5c8a8a642e79153f5d047b10ec1cba1d1cc65699 # v3
         with:
-          sarif_file: trivy-${{ matrix.name }}.sarif
-          category: trivy-${{ matrix.name }}
+          sarif_file: trivy-${{ matrix.name }}-os.sarif
+          category: trivy-${{ matrix.name }}-os
+
+      - name: Trivy scan ${{ matrix.name }} HEAD image for library vulnerabilities
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # 0.35.0
+        with:
+          scan-type: image
+          image-ref: ghcr.io/${{ steps.image_meta.outputs.owner }}/${{ matrix.image }}:${{ steps.image_meta.outputs.head_sha }}
+          scanners: vuln
+          vuln-type: library
+          ignore-unfixed: false
+          format: sarif
+          output: trivy-${{ matrix.name }}-library.sarif
+          exit-code: '0'
+
+      - name: Upload library SARIF to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@5c8a8a642e79153f5d047b10ec1cba1d1cc65699 # v3
+        with:
+          sarif_file: trivy-${{ matrix.name }}-library.sarif
+          category: trivy-${{ matrix.name }}-library
