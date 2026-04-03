@@ -21,3 +21,5 @@ dev = [
 pythonpath = ["."]
 testpaths = ["tests"]
 
+[tool.uv]
+exclude-newer = "3 days"

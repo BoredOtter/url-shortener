@@ -75,7 +75,25 @@ jobs:
           context: ${{ matrix.context }}
           file: ${{ matrix.dockerfile }}
           push: false
+          load: true
           no-cache: true
           cache-from: type=gha,scope=${{ matrix.name }}-pr
           cache-to: type=gha,mode=max,scope=${{ matrix.name }}-pr
           tags: ${{ matrix.image }}:pr-${{ github.event.pull_request.number }}-${{ github.sha }}
+
+      - name: Trivy scan changed ${{ matrix.name }} image for vulnerabilities and secrets
+        if: ${{ matrix.has_changes }}
+        uses: aquasecurity/trivy-action@0.35.0
+        with:
+          scan-type: image
+          image-ref: ${{ matrix.image }}:pr-${{ github.event.pull_request.number }}-${{ github.sha }}
+          scanners: vuln
+          vuln-type: library
+          ignore-unfixed: false
+          format: sarif
+          exit-code: '0'
+
+      - name: Upload SARIF to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: trivy.sarif
