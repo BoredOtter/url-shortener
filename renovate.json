@@ -1,6 +1,30 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "github>BoredOtter/renovate"
+  "extends": ["github>BoredOtter/renovate"],
+
+  "vulnerabilityAlerts": {
+    "labels": ["security"],
+    "commitMessageSuffix": "[SECURITY]",
+    "prCreation": "immediate",
+    "vulnerabilityFixStrategy": "lowest"
+  },
+
+  "packageRules": [
+    {
+      "description": "Automerge vulnerability/security PRs only for patch/minor",
+      "matchCategories": ["security"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "automerge": true,
+      "automergeType": "pr",
+      "platformAutomerge": true,
+      "labels": ["security"]
+    },
+    {
+      "description": "Security major updates: label but do not automerge",
+      "matchCategories": ["security"],
+      "matchUpdateTypes": ["major"],
+      "automerge": false,
+      "labels": ["security"]
+    }
   ]
 }
