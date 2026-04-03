@@ -41,16 +41,47 @@ jobs:
             context: ./api
             dockerfile: ./api/Dockerfile
             image: url-shortener-api
-            has_changes: ${{ needs.detect-changes.outputs.api_changed == 'true' }}
+            has_changes: true #${{ needs.detect-changes.outputs.api_changed == 'true' }}
           - name: client
             context: ./client
             dockerfile: ./client/Dockerfile
             image: url-shortener-client
-            has_changes: ${{ needs.detect-changes.outputs.client_changed == 'true' }}
+            has_changes: true #${{ needs.detect-changes.outputs.client_changed == 'true' }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Set up Python
+        if: ${{ matrix.has_changes && matrix.name == 'api' }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+
+      - name: Set up uv
+        if: ${{ matrix.has_changes && matrix.name == 'api' }}
+        uses: astral-sh/setup-uv@v5
+
+      - name: Run API tests
+        if: ${{ matrix.has_changes && matrix.name == 'api' }}
+        run: |
+          cd api
+          uv sync --dev
+          uv run pytest -q
+
+      - name: Set up Node.js
+        if: ${{ matrix.has_changes && matrix.name == 'client' }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Run client tests
+        if: ${{ matrix.has_changes && matrix.name == 'client' }}
+        run: |
+          cd client
+          corepack enable
+          yarn install --immutable
+          yarn test
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3

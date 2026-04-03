@@ -1,0 +1,8 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "dependencyDashboard": true,
+    "repositories": [
+        "BoredOtter/url-shortener"
+    ],
+    "extends": ["config:best-practices"]
+}
