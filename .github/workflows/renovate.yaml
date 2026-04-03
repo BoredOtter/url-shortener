@@ -29,5 +29,4 @@ jobs:
           token: ${{ secrets.RENOVATE_TOKEN }}
           configurationFile: .github/renovate.json
         env:
-          LOG_LEVEL: 'debug'
-          REPOSITORY: ${{ github.repository }}
+          LOG_LEVEL: ${{ github.event.inputs.log_level }}

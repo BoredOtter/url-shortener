@@ -1,5 +1,9 @@
 {
     "$schema": "https://docs.renovatebot.com/renovate-schema.json",
     "dependencyDashboard": true,
+    "platform": "github",
+    "repositories": [
+        "BoredOtter/meme-giver"
+    ],
     "extends": ["config:best-practices"]
 }
