@@ -8,6 +8,7 @@ COPY package.json yarn.lock .yarnrc.yml ./
 RUN yarn install --immutable
 
 COPY . .
+RUN yarn test
 RUN yarn build
 
 FROM nginxinc/nginx-unprivileged:1.27-alpine

@@ -31,37 +31,6 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Set up Python
-        if: ${{ matrix.name == 'api' }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.14'
-
-      - name: Set up uv
-        if: ${{ matrix.name == 'api' }}
-        uses: astral-sh/setup-uv@v5
-
-      - name: Run API tests
-        if: ${{ matrix.name == 'api' }}
-        run: |
-          cd api
-          uv sync --dev
-          uv run pytest -q
-
-      - name: Set up Node.js
-        if: ${{ matrix.name == 'client' }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-
-      - name: Run client tests
-        if: ${{ matrix.name == 'client' }}
-        run: |
-          cd client
-          corepack enable
-          yarn install --immutable
-          yarn test
-
       - name: Install Cosign
         uses: sigstore/cosign-installer@v4.1.0
 
@@ -90,6 +59,18 @@ jobs:
             type=sha,format=long,prefix=
             type=raw,value=latest,enable={{is_default_branch}}
 
+      - name: Build API test target
+        if: ${{ matrix.name == 'api' }}
+        uses: docker/build-push-action@v6.18.0
+        with:
+          context: ${{ matrix.context }}
+          file: ${{ matrix.dockerfile }}
+          platforms: linux/amd64
+          target: test
+          push: false
+          cache-from: type=gha,scope=${{ matrix.name }}-push
+          cache-to: type=gha,mode=max,scope=${{ matrix.name }}-push
+
       - name: Build and push ${{ matrix.name }} image
         uses: docker/build-push-action@v6.18.0
         id: build-and-push
@@ -98,6 +79,8 @@ jobs:
           file: ${{ matrix.dockerfile }}
           platforms: linux/amd64
           push: true
+          cache-from: type=gha,scope=${{ matrix.name }}-push
+          cache-to: type=gha,mode=max,scope=${{ matrix.name }}-push
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
 

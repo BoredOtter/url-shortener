@@ -1,4 +1,26 @@
 # syntax=docker/dockerfile:1.7
+FROM python:3.14.3-alpine3.23@sha256:faee120f7885a06fcc9677922331391fa690d911c020abb9e8025ff3d908e510 AS test
+
+WORKDIR /app
+
+COPY --from=ghcr.io/astral-sh/uv:0.11.2 /uv /uvx /usr/local/bin/
+
+ENV UV_COMPILE_BYTECODE=1 \
+	UV_LINK_MODE=copy \
+	UV_PYTHON_DOWNLOADS=never
+
+COPY pyproject.toml uv.lock ./
+RUN --mount=type=cache,target=/root/.cache/uv \
+	uv sync --frozen --dev --no-install-project --no-editable
+
+COPY main.py ./
+COPY app ./app
+COPY tests ./tests
+RUN --mount=type=cache,target=/root/.cache/uv \
+	uv sync --frozen --dev --no-editable
+
+RUN .venv/bin/pytest -q
+
 FROM python:3.14.3-alpine3.23@sha256:faee120f7885a06fcc9677922331391fa690d911c020abb9e8025ff3d908e510 AS builder
 
 WORKDIR /app
@@ -15,6 +37,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 COPY main.py ./
 COPY app ./app
+
 RUN --mount=type=cache,target=/root/.cache/uv \
 	uv sync --frozen --no-dev --no-editable
 
