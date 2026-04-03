@@ -1,7 +1,12 @@
 name: Security Scan
 
 on:
-  push:
+  workflow_dispatch:
+  workflow_run:
+    workflows:
+      - Build Images
+    types:
+      - completed
     branches:
       - master
   schedule:
@@ -14,6 +19,7 @@ permissions:
 
 jobs:
   trivy-image-scan:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'master') }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -27,9 +33,11 @@ jobs:
     steps:
       - name: Normalize image namespace and commit SHA
         id: image_meta
+        env:
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
         run: |
           echo "owner=${GITHUB_REPOSITORY_OWNER,,}" >> "$GITHUB_OUTPUT"
-          echo "head_sha=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+          echo "head_sha=${HEAD_SHA}" >> "$GITHUB_OUTPUT"
 
       - name: Install Cosign
         uses: sigstore/cosign-installer@cad07c2e89fa2edd6e2d7bab4c1aa38e53f76003 # v4.1.1
