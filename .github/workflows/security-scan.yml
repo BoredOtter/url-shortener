@@ -66,7 +66,6 @@ jobs:
           scan-type: image
           image-ref: ghcr.io/${{ steps.image_meta.outputs.owner }}/${{ matrix.image }}:${{ steps.image_meta.outputs.head_sha }}
           scanners: vuln
-          vuln-type: library, os
           ignore-unfixed: false
           format: sarif
           output: trivy-${{ matrix.name }}.sarif
