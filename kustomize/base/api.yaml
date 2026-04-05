@@ -19,7 +19,7 @@ spec:
           type: RuntimeDefault
       containers:
         - name: api
-          image: url-shortener-api-dev:COMMIT_SHA
+          image: ghcr.io/boredotter/url-shortener-api:COMMIT_SHA
           imagePullPolicy: IfNotPresent
           securityContext:
             allowPrivilegeEscalation: false
