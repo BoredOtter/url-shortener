@@ -94,3 +94,47 @@ jobs:
             images+="${tag}@${DIGEST} "
           done
           cosign sign --yes ${images}
+
+  sync-kustomize-base:
+    runs-on: ubuntu-latest
+    needs: build-image
+    steps:
+      - name: Checkout App Repository
+        uses: actions/checkout
+        with:
+          path: app
+
+      - name: Create GitHub App token
+        id: app_token
+        uses: actions/create-github-app-token
+        with:
+          app-id: ${{ secrets.GITOPS_APP_ID }}
+          private-key: ${{ secrets.GITOPS_APP_PRIVATE_KEY }}
+          owner: BoredOtter
+          repositories: url-shortener-argocd
+
+      - name: Checkout GitOps Repository
+        uses: actions/checkout
+        with:
+          repository: BoredOtter/url-shortener-argocd
+          token: ${{ steps.app_token.outputs.token }}
+          path: gitops
+
+      - name: Render and Copy Manifests
+        run: |
+          mkdir -p gitops/kustomize/base
+          rsync -a --delete app/kustomize/base/ gitops/kustomize/base/
+          
+          cd gitops/kustomize/base
+          find . -type f -name '*.yaml' -print0 | xargs -0 sed -i "s/COMMIT_SHA/${{ github.sha }}/g"
+
+      - name: Commit and Push to GitOps
+        run: |
+          cd gitops
+          git config user.name "gitops-boredotter[bot]"
+          git config user.email "273776110+gitops-boredotter[bot]@users.noreply.github.com"
+          
+          git add kustomize/base
+
+          git commit -m "chore: sync kustomize base from ${GITHUB_REPOSITORY}@${GITHUB_SHA}"
+          git push origin HEAD

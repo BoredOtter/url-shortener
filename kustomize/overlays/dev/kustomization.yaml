@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../base
+
+images:
+  - name: url-shortener-api-dev
+    newName: url-shortener-api-dev
+    newTag: latest
+  - name: url-shortener-client-dev
+    newName: url-shortener-client-dev
+    newTag: latest
