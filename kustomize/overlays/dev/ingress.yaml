@@ -1,24 +1,3 @@
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: url-shortener
-spec:
-  ingressClassName: nginx
-  rules:
-    - host: url-shortener.test
-      http:
-        paths:
-          - path: /api
-            pathType: Prefix
-            backend:
-              service:
-                name: api
-                port:
-                  number: 8000
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: client
-                port:
-                  number: 8080
+- op: replace
+  path: /spec/rules/0/host
+  value: url-shortener.test

@@ -62,14 +62,14 @@ class RoutesTestCase(unittest.TestCase):
         expected_short_id = hashlib.md5(expected_long_url.encode()).hexdigest()[:6]
 
         self.assertEqual(body["long_url"], expected_long_url)
-        self.assertTrue(body["short_url"].endswith(f"/api/{expected_short_id}"))
+        self.assertTrue(body["short_url"].endswith(f"/short/{expected_short_id}"))
 
-        redirect_response = self.client.get(f"/api/{expected_short_id}", follow_redirects=False)
+        redirect_response = self.client.get(f"/short/{expected_short_id}", follow_redirects=False)
         self.assertEqual(redirect_response.status_code, 307)
         self.assertEqual(redirect_response.headers["location"], expected_long_url)
 
     def test_redirect_returns_404_for_missing_id(self):
-        response = self.client.get("/api/does-not-exist", follow_redirects=False)
+        response = self.client.get("/short/does-not-exist", follow_redirects=False)
         self.assertEqual(response.status_code, 404)
         self.assertEqual(response.json(), {"detail": "ShortURL not found"})
 

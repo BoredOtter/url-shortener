@@ -4,6 +4,14 @@ kind: Kustomization
 resources:
   - ../../base
 
+patches:
+  - path: ingress.yaml
+    target:
+      group: networking.k8s.io
+      version: v1
+      kind: Ingress
+      name: url-shortener
+
 images:
   - name: url-shortener-api-dev
     newName: url-shortener-api-dev

@@ -13,7 +13,7 @@ describe("createShortUrl", () => {
       .mockResolvedValue(
         new Response(
           JSON.stringify({
-            short_url: "https://short.local/api/abc123",
+            short_url: "https://short.local/short/abc123",
             long_url: "https://example.com/path"
           }),
           { status: 200 }
@@ -23,7 +23,7 @@ describe("createShortUrl", () => {
     const result = await createShortUrl("example.com/path")
 
     expect(result).toEqual({
-      short_url: "https://short.local/api/abc123",
+      short_url: "https://short.local/short/abc123",
       long_url: "https://example.com/path"
     })
 

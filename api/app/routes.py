@@ -91,7 +91,7 @@ def shorten_url_api(request: Request, payload: ShortenRequest):
     return {"short_url": short_url, "long_url": normalized_url}
 
 
-@router.get("/api/{short_id:path}")
+@router.get("/short/{short_id}")
 def redirect_to_url(short_id: str):
     try:
         long_url = redis_client.get(short_id)

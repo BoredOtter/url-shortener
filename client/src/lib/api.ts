@@ -2,7 +2,7 @@ import { z } from "zod"
 
 const API_BASE_URL =
   import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, "") ??
-  (import.meta.env.DEV ? "http://localhost:8000/api" : "/api")
+  "/api"
 
 const shortenRequestSchema = z.object({
   url: z.string().url("Enter a valid URL")

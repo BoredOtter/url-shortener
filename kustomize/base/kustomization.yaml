@@ -5,3 +5,4 @@ resources:
   - api.yaml
   - client.yaml
   - redis.yaml
+  - ingress.yaml
