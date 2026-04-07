@@ -96,7 +96,9 @@ jobs:
           echo "Checking Dockerfiles for unpinned image references..."
 
           LOGS=$(find . -type f \( -name 'Dockerfile' -o -name 'Dockerfile.*' -o -name '*.Dockerfile' \) \
-            -exec sh -c 'grep -H -E "^FROM | --from=" "$1" | grep -v "@" || true' _ {} \;)
+            -exec sh -c 'grep -H -E "^[[:space:]]*FROM[[:space:]]+|--from=" "$1" \
+              | grep -Ev -- "--from=[[:alnum:]_.-]+([[:space:]]|$)" \
+              | grep -v "@" || true' _ {} \;)
 
           if [ -n "$LOGS" ]; then
             echo "::error title=Unpinned Docker image references detected::All FROM and --from image references must include a pinned digest (@sha256)."
