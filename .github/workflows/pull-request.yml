@@ -107,6 +107,16 @@ jobs:
           else
             echo "All FROM and --from image references are pinned with digests."
           fi
+      
+      - name: Run Trivy scanner for critical misconfigurations
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # 0.35.0
+        with:
+          scan-type: config
+          scan-ref: .
+          hide-progress: true
+          format: table
+          output: trivy.txt
+          severity: CRITICAL
 
       - name: Run Trivy scanner
         uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # 0.35.0
