@@ -82,31 +82,52 @@ jobs:
           cache-to: type=gha,mode=max,scope=${{ matrix.name }}-pr
           tags: ${{ matrix.image }}:pr-${{ github.event.pull_request.number }}-${{ github.sha }}
 
-  # trivy-fs-scan:
-  #   if: needs.detect-changes.outputs.has_changes == 'true'
-  #   needs: detect-changes
-  #   runs-on: ubuntu-latest
-  #   strategy:
-  #     fail-fast: false
-  #     matrix:
-  #       include:
-  #         - name: api
-  #           path: ./api
-  #           changed_output: api_changed
-  #         - name: client
-  #           path: ./client
-  #           changed_output: client_changed
+  configuration-scan:
+    runs-on: ubuntu-latest
 
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
 
-  #     - name: Trivy FS scan ${{ matrix.name }} (dependency vulns)
-  #       if: needs.detect-changes.outputs[matrix.changed_output] == 'true'
-  #       uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # 0.35.0
-  #       with:
-  #         scan-type: fs
-  #         scan-ref: ${{ matrix.path }}
-  #         ignore-unfixed: false
-  #         format: sarif
-  #         exit-code: '0'
+      - name: Validate Docker image digests
+        run: |
+          set -euo pipefail
+
+          echo "Checking Dockerfiles for unpinned image references..."
+
+          LOGS=$(find . -type f \( -name 'Dockerfile' -o -name 'Dockerfile.*' -o -name '*.Dockerfile' \) \
+            -exec sh -c 'grep -H -E "^FROM | --from=" "$1" | grep -v "@" || true' _ {} \;)
+
+          if [ -n "$LOGS" ]; then
+            echo "::error title=Unpinned Docker image references detected::All FROM and --from image references must include a pinned digest (@sha256)."
+            echo ""
+            echo "The following lines are missing a digest:"
+            echo "$LOGS"
+            exit 1
+          else
+            echo "All FROM and --from image references are pinned with digests."
+          fi
+
+      - name: Run Trivy scanner
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # 0.35.0
+        with:
+          scan-type: config
+          scan-ref: .
+          hide-progress: true
+          format: table
+          output: trivy.txt
+          exit-code: '0'
+
+      - name: Publish Trivy Output to Summary
+        run: |
+          if [[ -s trivy.txt ]]; then
+            {
+              echo "### Trivy Configuration Scan"
+              echo "<details><summary>Show scan results</summary>"
+              echo ""
+              echo '```text'
+              cat trivy.txt
+              echo '```'
+              echo "</details>"
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
