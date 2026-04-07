@@ -9,6 +9,7 @@ permissions:
   contents: read
   packages: write
   id-token: write
+  security-events: write
 
 jobs:
   build-image:
@@ -94,6 +95,42 @@ jobs:
             images+="${tag}@${DIGEST} "
           done
           cosign sign --yes ${images}
+
+      - name: Trivy scan ${{ matrix.name }} image for OS vulnerabilities
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # 0.35.0
+        with:
+          scan-type: image
+          image-ref: ghcr.io/${{ steps.image_namespace.outputs.owner }}/url-shortener-${{ matrix.name }}@${{ steps.build-and-push.outputs.digest }}
+          scanners: vuln
+          vuln-type: os
+          ignore-unfixed: false
+          format: sarif
+          output: trivy-${{ matrix.name }}-os.sarif
+          exit-code: '0'
+
+      - name: Upload OS SARIF to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@c10b8064de6f491fea524254123dbe5e09572f13 # v4.35.1
+        with:
+          sarif_file: trivy-${{ matrix.name }}-os.sarif
+          category: trivy-${{ matrix.name }}-os
+
+      - name: Trivy scan ${{ matrix.name }} image for library vulnerabilities
+        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # 0.35.0
+        with:
+          scan-type: image
+          image-ref: ghcr.io/${{ steps.image_namespace.outputs.owner }}/url-shortener-${{ matrix.name }}@${{ steps.build-and-push.outputs.digest }}
+          scanners: vuln
+          vuln-type: library
+          ignore-unfixed: false
+          format: sarif
+          output: trivy-${{ matrix.name }}-library.sarif
+          exit-code: '0'
+
+      - name: Upload library SARIF to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@c10b8064de6f491fea524254123dbe5e09572f13 # v4.35.1
+        with:
+          sarif_file: trivy-${{ matrix.name }}-library.sarif
+          category: trivy-${{ matrix.name }}-library
 
   sync-kustomize-base:
     runs-on: ubuntu-latest
