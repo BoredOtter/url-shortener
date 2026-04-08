@@ -85,16 +85,16 @@ jobs:
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
 
-      #- name: Sign the images with GitHub OIDC Token
-      #  env:
-      #    DIGEST: ${{ steps.build-and-push.outputs.digest }}
-      #    TAGS: ${{ steps.docker_meta.outputs.tags }}
-      #  run: |
-      #    images=""
-      #    for tag in ${TAGS}; do
-      #      images+="${tag}@${DIGEST} "
-      #    done
-      #    cosign sign --yes ${images}
+      - name: Sign the images with GitHub OIDC Token
+        env:
+          DIGEST: ${{ steps.build-and-push.outputs.digest }}
+          TAGS: ${{ steps.docker_meta.outputs.tags }}
+        run: |
+          images=""
+          for tag in ${TAGS}; do
+            images+="${tag}@${DIGEST} "
+          done
+          cosign sign --yes ${images}
 
       - name: Trivy scan ${{ matrix.name }} image for OS vulnerabilities
         uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # 0.35.0
