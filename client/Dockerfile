@@ -11,7 +11,7 @@ COPY . .
 RUN yarn test
 RUN yarn build
 
-FROM nginxinc/nginx-unprivileged:1.29-alpine@sha256:f99cc61bf1719f30230602036314ff6ba5dcede8965c5ed3ded71b8bbced3723
+FROM nginxinc/nginx-unprivileged:1.29-alpine@sha256:72cd9a222d01fdf47bd47ad8dc50b0221a768742b84a66c5e0b94ed13bcc6c72
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build /app/dist /usr/share/nginx/html
