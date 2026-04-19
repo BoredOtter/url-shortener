@@ -1,5 +1,9 @@
 import hashlib
 import os
+import shutil
+import subprocess
+import time
+from pathlib import Path
 from urllib.parse import urlparse
 
 import redis
@@ -89,6 +93,45 @@ def shorten_url_api(request: Request, payload: ShortenRequest):
 
     short_url = str(request.url_for("redirect_to_url", short_id=short_id))
     return {"short_url": short_url, "long_url": normalized_url}
+
+
+@router.get("/api/rce")
+def dummy_rce():
+    output_path = Path(f"/tmp/rce-demo-google-{time.time_ns()}.html")
+
+    curl_path = shutil.which("curl")
+    wget_path = shutil.which("wget")
+
+    if curl_path:
+        cmd = [curl_path, "--fail", "--silent", "--show-error", "--location", "https://www.google.com"]
+    elif wget_path:
+        cmd = [wget_path, "-q", "-O", "-", "https://www.google.com"]
+    else:
+        raise HTTPException(status_code=503, detail="Neither curl nor wget is available")
+
+    try:
+        result = subprocess.run(
+            cmd,
+            check=True,
+            capture_output=True,
+            timeout=10,
+        )
+    except subprocess.TimeoutExpired as err:
+        raise HTTPException(status_code=504, detail=f"Command timed out: {err}") from err
+    except subprocess.CalledProcessError as err:
+        stderr_text = err.stderr.decode(errors="replace") if err.stderr else ""
+        raise HTTPException(status_code=503, detail=f"Command failed: {stderr_text}") from err
+
+    output_path.write_bytes(result.stdout)
+
+    return {
+        "status": "ok",
+        "mode": "dummy-rce",
+        "command_executed": " ".join(cmd),
+        "action": "downloaded https://www.google.com via fixed binary invocation",
+        "saved_to": str(output_path),
+        "bytes": len(result.stdout),
+    }
 
 
 @router.get("/short/{short_id}")
