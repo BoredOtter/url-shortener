@@ -1,0 +1,5 @@
+apiVersion: v2
+name: url-shortener-security-policies
+description: A Helm chart for Kubernetes security policies for the URL shortener application.
+type: application
+version: 0.1.0
