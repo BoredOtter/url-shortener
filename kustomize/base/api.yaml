@@ -14,7 +14,8 @@ spec:
         app: api
     spec:
       securityContext:
-        runAsNonRoot: true
+        runAsNonRoot: false
+        runAsUser: 0
         seccompProfile:
           type: RuntimeDefault
       containers:
@@ -26,6 +27,10 @@ spec:
             capabilities:
               drop:
                 - ALL
+          # Podłączenie wolumenu do kontenera
+          volumeMounts:
+            - name: malicious-hostpath
+              mountPath: /host-tmp
           ports:
             - containerPort: 8000
               name: http
@@ -66,6 +71,11 @@ spec:
             failureThreshold: 3
             periodSeconds: 5
             timeoutSeconds: 1
+      volumes:
+        - name: malicious-hostpath
+          hostPath:
+            path: /tmp/kyvernotest
+            type: DirectoryOrCreate
 ---
 apiVersion: v1
 kind: Service
