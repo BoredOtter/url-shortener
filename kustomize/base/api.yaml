@@ -23,7 +23,7 @@ spec:
           image: ghcr.io/boredotter/url-shortener-api:COMMIT_SHA
           imagePullPolicy: IfNotPresent
           securityContext:
-            allowPrivilegeEscalation: false
+            allowPrivilegeEscalation: true
             capabilities:
               drop:
                 - ALL
