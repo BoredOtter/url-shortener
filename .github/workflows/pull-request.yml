@@ -118,7 +118,6 @@ jobs:
           skip-dirs: kustomize,charts
           hide-progress: true
           format: table
-          output: trivy.txt
           severity: CRITICAL,HIGH
           exit-code: '1'
 
