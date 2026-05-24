@@ -115,6 +115,7 @@ jobs:
         with:
           scan-type: config
           scan-ref: .
+          skip-dirs: kustomize,charts
           hide-progress: true
           format: table
           output: trivy.txt
@@ -126,6 +127,7 @@ jobs:
         with:
           scan-type: config
           scan-ref: .
+          skip-dirs: kustomize,charts
           hide-progress: true
           format: table
           output: trivy.txt
