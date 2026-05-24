@@ -51,7 +51,7 @@ function App() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Create short link</CardTitle>
+          <CardTitle>Create short URL</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={onSubmit} className="space-y-4">
