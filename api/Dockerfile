@@ -3,7 +3,7 @@ FROM python:3.14.3-alpine3.23@sha256:faee120f7885a06fcc9677922331391fa690d911c02
 
 WORKDIR /app
 
-COPY --from=ghcr.io/astral-sh/uv:0.11.3@sha256:90bbb3c16635e9627f49eec6539f956d70746c409209041800a0280b93152823 /uv /uvx /usr/local/bin/
+COPY --from=ghcr.io/astral-sh/uv:0.11.16@sha256:440fd6477af86a2f1b38080c539f1672cd22acb1b1a47e321dba5158ab08864d /uv /uvx /usr/local/bin/
 
 ENV UV_COMPILE_BYTECODE=1 \
 	UV_LINK_MODE=copy \
@@ -25,7 +25,7 @@ FROM python:3.14.3-alpine3.23@sha256:faee120f7885a06fcc9677922331391fa690d911c02
 
 WORKDIR /app
 
-COPY --from=ghcr.io/astral-sh/uv:0.11.3@sha256:90bbb3c16635e9627f49eec6539f956d70746c409209041800a0280b93152823 /uv /uvx /usr/local/bin/
+COPY --from=ghcr.io/astral-sh/uv:0.11.16@sha256:440fd6477af86a2f1b38080c539f1672cd22acb1b1a47e321dba5158ab08864d /uv /uvx /usr/local/bin/
 
 ENV UV_COMPILE_BYTECODE=1 \
 	UV_LINK_MODE=copy \
