@@ -14,7 +14,7 @@ spec:
         app: api
     spec:
       securityContext:
-        runAsNonRoot: false
+        runAsNonRoot: true
         seccompProfile:
           type: RuntimeDefault
       containers:
