@@ -86,7 +86,6 @@ jobs:
           labels: ${{ steps.docker_meta.outputs.labels }}
 
       - name: Sign the images with GitHub OIDC Token
-        if: false
         env:
           DIGEST: ${{ steps.build-and-push.outputs.digest }}
           TAGS: ${{ steps.docker_meta.outputs.tags }}
