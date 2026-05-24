@@ -55,7 +55,7 @@ COPY --from=builder /app/.venv /app/.venv
 COPY --chown=10001:10001 main.py ./main.py
 COPY --chown=10001:10001 app ./app
 
-USER 10001:10001
+USER root
 
 EXPOSE 8000
 
