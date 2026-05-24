@@ -97,7 +97,7 @@ jobs:
           cosign sign --yes ${images}
 
       - name: Trivy scan ${{ matrix.name }} image for OS vulnerabilities
-        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # 0.35.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           scan-type: image
           image-ref: ghcr.io/${{ steps.image_namespace.outputs.owner }}/url-shortener-${{ matrix.name }}@${{ steps.build-and-push.outputs.digest }}
@@ -115,7 +115,7 @@ jobs:
           category: trivy-${{ matrix.name }}-os
 
       - name: Trivy scan ${{ matrix.name }} image for library vulnerabilities
-        uses: aquasecurity/trivy-action@57a97c7e7821a5776cebc9bb87c984fa69cba8f1 # 0.35.0
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           scan-type: image
           image-ref: ghcr.io/${{ steps.image_namespace.outputs.owner }}/url-shortener-${{ matrix.name }}@${{ steps.build-and-push.outputs.digest }}
