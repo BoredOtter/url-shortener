@@ -1,9 +1,6 @@
 name: Security Scan
 
 on:
-  push:
-    branches:
-      - master
   workflow_dispatch:
   schedule:
     - cron: '0 * * * *'
