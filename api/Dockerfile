@@ -48,6 +48,8 @@ WORKDIR /app
 ENV PATH="/app/.venv/bin:$PATH" \
 	PYTHONUNBUFFERED=1
 
+RUN apk add --no-cache "sqlite-libs>=3.53.4-r0"
+
 RUN addgroup -S -g 10001 appgroup \
   && adduser -S -D -H -u 10001 -G appgroup appuser
 
