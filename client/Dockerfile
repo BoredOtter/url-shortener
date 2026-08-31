@@ -13,6 +13,7 @@ RUN yarn build
 
 FROM nginxinc/nginx-unprivileged:1.31-alpine@sha256:3707417e3304492667a63c90ac0103465330437f9cdfaa38f8cd19f9975cbeed
 
+USER root
 RUN apk add --no-cache 'libexpat>=2.8.1-r0'
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
